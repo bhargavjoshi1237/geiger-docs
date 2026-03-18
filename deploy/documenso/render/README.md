@@ -37,7 +37,7 @@ Why these plans:
 
 ## 1. Deploy the Blueprint
 
-1. Commit and push `deploy/documenso/render/` to the branch Render will track. It is currently uncommitted on `feat/harden-and-signing`.
+1. Commit and push `deploy/documenso/render/` to the branch Render will track.
 2. In the Render Dashboard, go to **New > Blueprint**, connect the repo and pick the branch.
 3. Set **Blueprint Path** to `deploy/documenso/render/render.yaml`.
    - Render looks for `render.yaml` at the repo root by default, but this field accepts any path.
