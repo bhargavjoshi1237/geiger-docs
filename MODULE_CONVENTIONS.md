@@ -1,8 +1,8 @@
 # Module Conventions (Screen ↔ Suite)
 
 How to build a workspace screen (navigation, data, UI, permissions) so it matches
-the rest of the app. Reference implementation: the **events** area
-(`components/internal/screens/events`, `components/internal/screens/overview`)
+the rest of the app. Reference implementation: the **documents** area
+(`components/internal/screens/documents`, `components/internal/screens/overview`)
 and the shared kit (`components/internal/shared`).
 
 ## Where things go
