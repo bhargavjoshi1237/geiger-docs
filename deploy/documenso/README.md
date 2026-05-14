@@ -150,7 +150,7 @@ The token has full access to this team. Never expose it to the browser.
    - **Events:** `DOCUMENT_SENT`, `DOCUMENT_OPENED`, `DOCUMENT_SIGNED`, `DOCUMENT_RECIPIENT_COMPLETED`, `DOCUMENT_COMPLETED`, `DOCUMENT_REJECTED`, `DOCUMENT_CANCELLED`, `RECIPIENT_EXPIRED`.
    - **Secret:** the value you generated. Documenso sends it as plain text in the `X-Documenso-Secret` header.
 3. In Geiger Docs, set `DOCUMENSO_WEBHOOK_SECRET` to the same value.
-4. Once Geiger Docs is deployed with Step 3, open the webhook and click **Test**.
+4. Once Geiger Docs is deployed with that secret, open the webhook and click **Test**.
    - Expect `200`.
    - `401` means the two secrets differ.
    - Delivery logs and a **Resend** button are on the webhook's detail page.
