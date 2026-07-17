@@ -102,6 +102,8 @@ components/internal/
   workspace/             Project gate states and create-project dialog
 context/                 Active project
 lib/supabase/            Browser data layer, one file per docs table
+lib/client/              Browser helper for the /api/* route handlers (base-path aware)
+lib/hooks/               Workspace URL state and role-gated sidebar visibility
 lib/server/              Server-only: session/admin clients, Documenso client, signing, PDF, notifications
 lib/signing/             Shared signing vocabulary and field placeholders (browser + server)
 lib/notifications/       Notification types and client senders
