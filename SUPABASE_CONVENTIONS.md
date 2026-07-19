@@ -95,7 +95,7 @@ with no extra config.
 Same principles, different layout — keep these straight when reading flow's
 `SUPABASE_CONVENTIONS.md`:
 
-| | geiger-flow | geiger-events |
+| | geiger-flow | geiger-docs |
 |---|---|---|
 | Schema | dedicated `flow` schema (`flow.issues`) | **a dedicated per-product schema** (`<schema>.<table>`); only the shared `projects` table stays in `public` |
 | Client wrapper | `flowClient()` = `createClient().schema("flow")` | `schemaClient()` = `createClient().schema("<schema>")` (see §1) |
