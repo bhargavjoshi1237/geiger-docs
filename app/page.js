@@ -55,7 +55,7 @@ function Footer() {
           <div>
             <h4 className="mb-4 font-bold text-foreground">Product</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/home" className="transition-colors hover:text-foreground">Workspace</Link></li>
+              <li><Link href="/org" className="transition-colors hover:text-foreground">Workspace</Link></li>
               <li><Link href="#features" className="transition-colors hover:text-foreground">Features</Link></li>
             </ul>
           </div>
@@ -97,7 +97,7 @@ export default function DocsLandingPage() {
               Geiger Docs brings documents, collections, templates, and version history into a focused workspace for your team's knowledge.
             </p>
             <Link
-              href="/home"
+              href="/org"
               className="inline-flex h-10 items-center gap-2 rounded-full bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-white sm:text-base"
             >
               Continue to Docs
@@ -131,7 +131,7 @@ export default function DocsLandingPage() {
               TRY GEIGER NOW
             </h2>
             <Link
-              href="/home"
+              href="/org"
               className="inline-flex h-10 items-center gap-2 rounded-full bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-white"
             >
               Open Docs

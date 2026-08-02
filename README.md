@@ -89,6 +89,7 @@ This codebase follows a consistent set of patterns. Read these before contributi
 - [`AGENTS.md`](AGENTS.md) — working notes for this Next.js version
 - [`MODULE_CONVENTIONS.md`](MODULE_CONVENTIONS.md) — how to build a workspace screen
 - [`SUPABASE_CONVENTIONS.md`](SUPABASE_CONVENTIONS.md) — the data-layer playbook
+- [`MIGRATION_CONVENTIONS.md`](MIGRATION_CONVENTIONS.md) — schema changes and `@geiger/orm`
 - [`crafting.md`](crafting.md) — UI craft and quality bar
 
 ## The Geiger suite
