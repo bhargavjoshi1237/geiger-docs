@@ -2,27 +2,28 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, FileText, FolderOpen, BookOpen, History, Share2, ShieldCheck } from "lucide-react";
 import { SiteHeader } from "@/components/landing/site-header";
+import { DOCS_APP_URL } from "@/lib/app-url";
 
 const assetPrefix = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export const metadata = {
   title: "Docs - Geiger Studio",
-  description: "Your team's knowledge base, organized.",
+  description: "Prepare documents, send them for signature, keep the audit trail.",
 };
 
 const features = [
-  { title: "Documents", description: "Write and edit rich documents with collaborative formatting tools.", icon: FileText },
-  { title: "Collections", description: "Group related documents into organized collections for easy navigation.", icon: FolderOpen },
-  { title: "Templates", description: "Start quickly with reusable templates for common document types.", icon: BookOpen },
-  { title: "Version History", description: "Track every change and restore any previous version of a document.", icon: History },
-  { title: "Sharing & Export", description: "Share documents with teammates or export them in multiple formats.", icon: Share2 },
-  { title: "Permissions", description: "Control who can view, comment, or edit each document and collection.", icon: ShieldCheck },
+  { title: "Documents", description: "Upload a document, place the fields it needs, and send it out for signature.", icon: FileText },
+  { title: "Signing order", description: "Route a document through several signers in the order you choose.", icon: FolderOpen },
+  { title: "Templates", description: "Save a prepared document and reuse it for every send after the first.", icon: BookOpen },
+  { title: "Audit trail", description: "Every view, signature and completion is recorded against the document.", icon: History },
+  { title: "Signing links", description: "Recipients sign from a link in their inbox, with no account to create.", icon: Share2 },
+  { title: "Permissions", description: "Control who in your team can prepare, send and manage documents.", icon: ShieldCheck },
 ];
 
 const faqs = [
-  { question: "What is Geiger Docs?", answer: "Geiger Docs is a documentation workspace for creating, organizing, and sharing your team's knowledge." },
-  { question: "Where is the workspace?", answer: "The full Docs workspace lives at /home once you're signed in." },
-  { question: "Can I organize docs into folders?", answer: "Yes. Collections let you group documents hierarchically and apply shared permissions." },
+  { question: "What is Geiger Docs?", answer: "Geiger Docs is where your team prepares documents, sends them for signature, and keeps the signed copies with their audit trail." },
+  { question: "Where is the workspace?", answer: "The workspace is a separate app at docs.geiger.studio — the buttons on this page take you there." },
+  { question: "Do signers need an account?", answer: "No. Recipients open a link, sign, and are done; only your team signs in." },
   { question: "Is it part of Geiger Studio?", answer: "Yes. Docs is one product in the Geiger Studio suite, sharing authentication with other tools." },
 ];
 
@@ -55,7 +56,7 @@ function Footer() {
           <div>
             <h4 className="mb-4 font-bold text-foreground">Product</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/org" className="transition-colors hover:text-foreground">Workspace</Link></li>
+              <li><Link href={DOCS_APP_URL} className="transition-colors hover:text-foreground">Workspace</Link></li>
               <li><Link href="#features" className="transition-colors hover:text-foreground">Features</Link></li>
             </ul>
           </div>
@@ -91,13 +92,13 @@ export default function DocsLandingPage() {
         <section className="mx-auto mb-10 mt-10 flex w-full max-w-6xl items-start justify-start px-4 sm:mt-16 sm:px-6">
           <div className="max-w-3xl">
             <h1 className="mb-4 text-2xl font-semibold text-white sm:text-3xl">
-              Your team's knowledge base, organized.
+              Documents, signed and accounted for.
             </h1>
             <p className="mb-6 max-w-xl text-sm text-muted-foreground sm:text-base">
-              Geiger Docs brings documents, collections, templates, and version history into a focused workspace for your team's knowledge.
+              Geiger Docs takes a document from draft to signed: prepare it, route it to the people who need to sign, and keep the completed copy with a verifiable audit trail.
             </p>
             <Link
-              href="/org"
+              href={DOCS_APP_URL}
               className="inline-flex h-10 items-center gap-2 rounded-full bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-white sm:text-base"
             >
               Continue to Docs
@@ -131,7 +132,7 @@ export default function DocsLandingPage() {
               TRY GEIGER NOW
             </h2>
             <Link
-              href="/org"
+              href={DOCS_APP_URL}
               className="inline-flex h-10 items-center gap-2 rounded-full bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-white"
             >
               Open Docs

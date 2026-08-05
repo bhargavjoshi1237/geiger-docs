@@ -18,9 +18,31 @@ Geiger Docs is the document application of the Geiger suite. It covers the docum
 
 It sits alongside Geiger Notes — where Notes is a free-form canvas for thinking, Docs is the structured, shareable, signable artefact that comes out of it.
 
+## Where the product lives
+
+**This repo is the marketing site and suite shell.** The Geiger Docs workspace
+itself is a separate application — a fork of [Documenso](https://github.com/documenso/documenso)
+re-skinned into the suite — in **`geiger-docs-app`**, deployed to
+`docs.geiger.studio`. Every "open the app" link here points at
+`NEXT_PUBLIC_DOCS_APP_URL`.
+
+That split is deliberate: forking gave us a working, trust-critical signing
+engine on day one rather than rebuilding one. The reasoning, the alternatives
+weighed, and the shape of the fork are recorded in
+[`docs/superpowers/specs/2026-08-05-geiger-docs-documenso-fork-design.md`](docs/superpowers/specs/2026-08-05-geiger-docs-documenso-fork-design.md),
+with the competitive research behind the choice in
+[`docs/product-research/`](docs/product-research).
+
+**Note on the database:** the fork owns the `docs` Postgres schema and manages it
+with Prisma, not `@geiger/orm`. `MIGRATION_CONVENTIONS.md` still governs anything
+this repo adds; it does not govern the fork.
+
+**Note on licensing:** Documenso is AGPL-3.0, and the fork carries
+source-availability obligations when served over a network.
+
 ## Status
 
-**Early.** The application shell is in place: the suite layout, sidebar and topbar, banner, shared screen kit, theming, and the design tokens from `@geiger/ui`. Product screens are being built out against the suite's screen and data-layer conventions. Competitive research for the signing product lives in [`docs/product-research/`](docs/product-research).
+**Early.** The application shell is in place: the suite layout, sidebar and topbar, banner, shared screen kit, theming, and the design tokens from `@geiger/ui`.
 
 ## Tech stack
 
