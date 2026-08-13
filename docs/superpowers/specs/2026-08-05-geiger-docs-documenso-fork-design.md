@@ -121,10 +121,28 @@ the highest-risk item in the build.
 
 ### Stripped for v1
 
-`packages/ee`; Stripe billing and plan UI; the public developer surface
-(`packages/api`, ts-rest, API tokens, webhooks, embed SDK, `apps/openpage-api`);
-all locales but English. Teams and organisations stay — they are wired through
-the document model too deeply to remove cheaply.
+Teams and organisations stay — they are wired through the document model too
+deeply to remove cheaply.
+
+What was measured before cutting, and what it cost:
+
+| Target | Coupling | Action |
+|---|---|---|
+| Locales | 11 catalogues, self-contained | **Deleted.** English only; lingui itself stays |
+| `apps/openpage-api` | no references anywhere | **Deleted**, with its workspace scripts |
+| Public API (v1 ts-rest, OpenAPI docs) | 3 importers | **Unmounted** behind `NEXT_PRIVATE_PUBLIC_API_ENABLED` |
+| `packages/ee` | 49 files import it | **Left in place**, inert without a licence key |
+| Stripe billing | 51 files reference it | **Left in place**, off via `NEXT_PUBLIC_FEATURE_BILLING_ENABLED=false` |
+| Webhooks / embedding | 97 files | **Left in place** |
+
+The three "left in place" rows are deliberate. At 49–97 files of coupling, tearing
+them out is its own piece of work with a real chance of breaking the signing
+paths; disabling them removes the surface without that risk. The `/api/v2`
+handlers stay mounted even with the public API off, because the app's own
+download links resolve through them.
+
+**Follow-up:** excise `packages/ee`, Stripe and webhooks properly once the fork
+is running and there is something to regression-test against.
 
 ## Build sequence
 
