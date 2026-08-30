@@ -2,8 +2,9 @@
 
 How to wire a new feature area to Supabase **cleanly** — one reusable client,
 one pure data-access file per area, a snake_case ↔ camelCase boundary, and the
-screen owning all UX. Reference implementation: **events**
-(`lib/supabase/events.js`, `lib/supabase/client.js`). Mirror it.
+screen owning all UX. Reference implementation: **documents**
+(`lib/supabase/documents.js`, `supabase/components/docs-client.js`,
+`lib/supabase/client.js`). Mirror it.
 
 This doc covers the *data* layer only. For schema changes and migrations see
 **`MIGRATION_CONVENTIONS.md`**; for screens/registry/UI craft see
@@ -116,7 +117,7 @@ then **empty** state, never bundled sample data.
 | Concern | Location | Naming |
 |---|---|---|
 | Base browser client (auth + fetch tracking) | `lib/supabase/client.js` | `createClient()` |
-| **Shared guard / config helper** (imported everywhere) | `lib/supabase/events.js` today; ideally `supabase/components/events-client.js` | `isSupabaseConfigured()` |
+| **Shared guard / config helper** (imported everywhere) | `supabase/components/docs-client.js` | `isSupabaseConfigured()`, `schemaClient()` |
 | Data-access layer (one per area) | `lib/supabase/<area>.js` | `list*/get*/create*/update*/softDelete*`, `normalize*`, `toRow` |
 | Storage helpers | `lib/supabase/storage.js` | `uploadEventImage`, `buildPublicUrl`, `eventMediaPrefix` |
 | SQL schema / policies | `supabase/migrations/<version>_<name>.sql` | `@up`/`@down`, **idempotent** DDL — see `MIGRATION_CONVENTIONS.md` |
