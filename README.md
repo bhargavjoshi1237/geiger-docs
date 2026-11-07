@@ -20,12 +20,12 @@ It sits alongside Geiger Notes — where Notes is a free-form canvas for thinkin
 
 ## Status
 
-**Early.** The application shell is in place: the suite layout, sidebar and topbar, banner, shared screen kit, theming, and the design tokens from `@geiger/ui`. Product screens are being built out against the suite's screen and data-layer conventions. Competitive research for the signing product lives in [`docs/product-research/`](docs/product-research).
+**v1 — document workspace.** Per-project Overview, Documents (Markdown editor with preview, version history, sharing and comments), Collections, Templates, Shared and Settings screens, plus a read-only public page at `/d/<id>`. Sharing is per document: workspace, public link, or specific people (viewer / commenter / editor); specific-people access is enforced in the UI only until RLS is tightened. The design lives in [`docs/superpowers/specs/`](docs/superpowers/specs). Signing is the next major area — see [`docs/product-research/`](docs/product-research).
 
 ## Tech stack
 
 - **Framework** — Next.js 16 (App Router, SSR/SSG) and React 19
-- **Styling** — Tailwind CSS v4 and shadcn/ui, with the shared [`@geiger/ui`](https://github.com/bhargavjoshi1237/geiger-ui) component library
+- **Styling** — Tailwind CSS v4, components only from the shared [`@geiger/ui`](https://github.com/bhargavjoshi1237/geiger-ui) component library
 - **Icons** — Lucide
 - **Backend** — Supabase (Postgres, Auth, Storage)
 
@@ -49,6 +49,17 @@ Create a `.env` file in the project root:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+# Server-only, used by migrations (npm run db:push)
+STRING_URI=postgresql://...
+```
+
+### Database
+
+Tables live in the `docs` schema and ship as `@geiger/orm` migrations in `supabase/migrations/`:
+
+```bash
+npm run db:status
+npm run db:push
 ```
 
 ### Develop
@@ -59,7 +70,10 @@ npm run dev
 
 Local routes:
 
-- `/` and `/home` — the Docs workspace
+- `/` — landing page
+- `/project` — opens your last project (`/home` and `/org` redirect here)
+- `/project/<projectId>/<tab>` — the Docs workspace (`?doc=<id>` opens a document)
+- `/d/<id>` — public read-only document (only when its sharing is set to public link)
 - `/pallet` — dark palette reference
 - `/palletw` — light palette reference
 
@@ -69,17 +83,18 @@ Production builds use the `/docs` base path behind the suite hub.
 
 ```
 app/
-  home/                  Docs workspace
+  project/               Project resolver and the workspace shell
+  d/[id]/                Public read-only document page
   pallet/, palletw/      Dark and light palette references
-components/
-  internal/screens/      Workspace screens
-  internal/sidebar/      Navigation
-  internal/topbar/       Workspace top bar
-  internal/shared/       Shared screen kit (headers, tables, stats, dialogs)
-  landing/               Site header and suite mega-menu
-  ui/                    shadcn primitives
-lib/supabase/            Supabase client, user, and activity tracking
-docs/product-research/   Signing and document-platform research
+components/internal/
+  screens/               Workspace screens + registry (documents, collections, templates…)
+  sidebar/, topbar/      Workspace navigation and top bar
+  shared/                Screen kit re-exports, wrappers, filter dropdown, Markdown view
+  workspace/             Project gate states and create-project dialog
+context/                 Active project
+lib/supabase/            Data layer, one file per docs table
+supabase/                Schema-scoped client helper and migrations
+docs/                    Design specs and product research
 ```
 
 ## Conventions
