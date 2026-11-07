@@ -1,65 +1,42 @@
 "use client";
 
 import React from "react";
+import { PanelLeft } from "lucide-react";
 import {
+  Button,
   Sidebar,
-  SidebarHeader,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarRail,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { ChevronDown, Search, MoreVertical, PanelLeft, Bell, HelpCircle, X } from "lucide-react";
+} from "@geiger/ui";
 import { SidebarOption } from "./sidebar_option";
-import { workspaceNav } from "./sidebar_nav";
-import { NotificationsDropdown } from "../topbar/dialogue/notifications_dropdown";
-import { roleHasPermission, tabPermissionKey } from "@/lib/rbac";
-import { Button } from "@/components/ui/button";
+import { useVisibleNav } from "@/lib/hooks/use-visible-nav";
+
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 function MobileSidebarHeader() {
-  const { isMobile, toggleSidebar } = useSidebar();
-
-  if (!isMobile) {
-    return null;
-  }
+  const { isMobile } = useSidebar();
+  if (!isMobile) return null;
 
   return (
     <SidebarHeader className="p-0 border-b border-sidebar-border">
-      <div className="flex items-center justify-between px-4 h-14">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded flex items-center justify-center shrink-0">
-            <img
-              src="/logo1.svg"
-              alt=""
-              className="w-5 h-5"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-                e.currentTarget.parentElement.innerHTML =
-                  '<div class="w-2 h-2 bg-foreground rounded-full"></div>';
-              }}
-            />
-          </div>
-          <span className="text-foreground font-semibold text-sm">Docs</span>
-        </div>
+      <div className="flex items-center gap-2 px-4 h-14">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`${BASE_PATH}/logo1.svg`} alt="" className="w-5 h-5" />
+        <span className="text-foreground font-semibold text-sm truncate">Docs</span>
       </div>
     </SidebarHeader>
   );
 }
 
-export function AppSidebar({
-  activeTab = "Overview",
-  onTabChange = () => {},
-  roleId = "workspace_owner",
-  roles = [],
-}) {
+export function AppSidebar({ activeTab = "Overview", onTabChange = () => {} }) {
   const { toggleSidebar } = useSidebar();
-  const visibleNav = workspaceNav.filter((item) =>
-    roleHasPermission(roles, roleId, tabPermissionKey(item.title)),
-  );
+  const visibleNav = useVisibleNav();
 
   return (
     <Sidebar
@@ -67,7 +44,7 @@ export function AppSidebar({
       className="bg-sidebar border-r border-sidebar-border text-sidebar-foreground"
     >
       <MobileSidebarHeader />
-      <SidebarContent className="py-1 space-y-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <SidebarContent className="relative flex-1 overflow-y-auto overflow-x-hidden bg-sidebar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -85,11 +62,13 @@ export function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-2 border-t border-sidebar-border mt-auto">
+      <SidebarFooter className="p-2 border-t border-sidebar-border mt-auto z-10 bg-sidebar">
         <Button
           type="button"
+          variant="ghost"
           onClick={toggleSidebar}
-          className="flex items-center gap-3 p-2 w-full rounded-lg hover:bg-sidebar-accent transition-all text-sidebar-foreground hover:text-foreground group-data-[collapsible=icon]:justify-center"
+          aria-label="Toggle sidebar"
+          className="flex items-center gap-3 p-2 w-full rounded-lg hover:bg-sidebar-accent transition-all text-sidebar-foreground hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center"
         >
           <PanelLeft className="w-5 h-5 shrink-0" />
         </Button>

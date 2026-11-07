@@ -2,19 +2,17 @@
 
 import React from "react";
 import {
-  SidebarMenuItem,
-  SidebarMenuButton,
+  Button,
   SidebarMenuBadge,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
+  SidebarMenuButton,
+  SidebarMenuItem,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+  useSidebar,
+} from "@geiger/ui";
+import { cn } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
 
 export function SidebarOption({
   title,

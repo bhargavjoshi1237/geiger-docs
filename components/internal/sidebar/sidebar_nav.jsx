@@ -1,22 +1,18 @@
 import {
   LayoutDashboard,
-  Box,
-  Inbox,
-  Users2,
-  ShieldCheck,
-  BarChart3,
-  CreditCard,
+  FileText,
+  FolderOpen,
+  BookOpen,
+  Share2,
   Settings,
 } from "lucide-react";
 
+// Workspace nav; each title must match a key in screens/registry.jsx.
 export const workspaceNav = [
   { title: "Overview", icon: LayoutDashboard },
-  { title: "Projects", icon: Box },
-  { title: "Reporting", icon: BarChart3 },
-  { title: "Inbox", icon: Inbox },
-  { title: "Team", icon: Users2 },
-  { title: "Roles", icon: ShieldCheck },
-  { title: "Usage", icon: BarChart3 },
-  { title: "Billing", icon: CreditCard },
-  { title: "Organization settings", icon: Settings },
+  { title: "Documents", icon: FileText },
+  { title: "Collections", icon: FolderOpen },
+  { title: "Templates", icon: BookOpen },
+  { title: "Shared", icon: Share2 },
+  { title: "Settings", icon: Settings },
 ];

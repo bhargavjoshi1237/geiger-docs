@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  SegmentedTabs,
+} from "@geiger/ui";
 import { Bell, Download, MessageSquare } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { getUser } from "@/lib/supabase/user";
 import { formatDistanceToNow } from "date-fns";
-import { SegmentedTabs } from "@/components/internal/shared/segmented_tabs";
-import { Button } from "@/components/ui/button";
 
 const NOTIFICATION_TABS = [
   { label: "All", value: "all" },

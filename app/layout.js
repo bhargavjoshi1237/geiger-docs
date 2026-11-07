@@ -2,9 +2,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SystemFavicon } from "@/components/system-favicon";
-import { Toaster } from "@/components/ui/sonner";
-import { BannerProvider } from "@/context/banner-context";
-import { GlobalBanner } from "@/components/internal/banner/global_banner";
+import { BannerProvider, GlobalBanner } from "@geiger/ui/global-banner";
+import { Toaster } from "@geiger/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Docs - Geiger Studio",
-  description: "Geiger Studio - Docs",
+  description: "Write, organize and share your team's documents.",
 };
 
 export default function RootLayout({ children }) {
@@ -40,7 +39,7 @@ export default function RootLayout({ children }) {
               <GlobalBanner />
               {children}
             </div>
-            <Toaster richColors closeButton />
+            <Toaster richColors />
           </BannerProvider>
         </ThemeProvider>
       </body>
