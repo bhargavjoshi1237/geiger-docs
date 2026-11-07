@@ -14,6 +14,7 @@ import {
 import { MainScreenWrapper } from "@/components/internal/shared/screen_wrappers";
 import { FilterDropdown } from "@/components/internal/shared/filter_dropdown";
 import { formatDate, formatRelative } from "@/components/internal/screens/documents/constants";
+import { buildNewDocument } from "@/components/internal/screens/documents/create_document_dialog";
 import {
   DEFAULT_TEMPLATE_CATEGORY,
   DeleteTemplateDialog,
@@ -179,15 +180,15 @@ export function TemplatesScreen() {
   const handleUse = async (template) => {
     if (usingId) return;
     setUsingId(template.id);
-    const created = await createDocument({
-      id: crypto.randomUUID(),
-      projectId,
-      title: template.name,
-      body: template.body,
-      status: "Draft",
-      shareMode: settings?.defaultShareMode || "workspace",
-      createdBy: userId,
-    });
+    const created = await createDocument(
+      buildNewDocument({
+        projectId,
+        title: template.name,
+        body: template.body,
+        settings,
+        createdBy: userId,
+      }),
+    );
     setUsingId(null);
     if (created) {
       toast.success(`Created "${created.title}" from the template.`);

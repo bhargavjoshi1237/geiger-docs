@@ -39,7 +39,7 @@ import {
 } from "@geiger/ui";
 import { EmptyState, InlineTitleInput, StatusPill } from "@/components/internal/shared/screen_kit";
 import { MainScreenWrapper } from "@/components/internal/shared/screen_wrappers";
-import { useWorkspaceUrl } from "@/lib/hooks/use-workspace-url";
+import { registerNavigationGuard, useWorkspaceUrl } from "@/lib/hooks/use-workspace-url";
 import { getUser } from "@/lib/supabase/user";
 import { updateDocument } from "@/lib/supabase/documents";
 import { createDocumentVersion } from "@/lib/supabase/document_versions";
@@ -123,6 +123,10 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
   }, [doc.id, restricted]);
 
   const apply = (next) => {
+    // Switching into restricted mode refetches members; show loading instead of the stale list.
+    if (next.shareMode === "restricted" && docRef.current.shareMode !== "restricted") {
+      setMembersReady(false);
+    }
     docRef.current = next;
     setDoc(next);
     onChange?.(next);
@@ -197,7 +201,13 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
       event.returnValue = "";
     };
     window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+    const releaseGuard = registerNavigationGuard(() =>
+      window.confirm("You have unsaved changes. Leave without saving?"),
+    );
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      releaseGuard();
+    };
   }, [dirty]);
 
   const commitTitle = () => {

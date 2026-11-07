@@ -188,7 +188,11 @@ export function DocumentsScreen() {
       title: `${doc.title || "Untitled"} (copy)`,
       body: doc.body,
       status: "Draft",
-      shareMode: doc.shareMode,
+      // A public copy would get a dead link while public links are off.
+      shareMode:
+        doc.shareMode === "public" && settings?.allowPublicLinks === false
+          ? "workspace"
+          : doc.shareMode,
       createdBy: userId,
       createdAt: now,
       updatedAt: now,

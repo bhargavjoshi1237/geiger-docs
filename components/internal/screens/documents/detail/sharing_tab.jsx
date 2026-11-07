@@ -129,8 +129,15 @@ export function SharingTab({
     toast.success(previous ? `Updated ${address}` : `Added ${address}`);
   };
 
+  // A non-creator editing their own row would lock themselves out mid-edit.
+  const isSelf = (member) => !isCreator && lower(member.email) === lower(user?.email);
+
   const changeRole = async (member, nextRole) => {
     if (nextRole === member.role) return;
+    if (isSelf(member)) {
+      toast.error("You can't change your own access. Ask the document owner.");
+      return;
+    }
     setMembers((prev) => prev.map((m) => (m.id === member.id ? { ...m, role: nextRole } : m)));
     const saved = await updateDocumentMember(member.id, { role: nextRole });
     if (!saved) {
@@ -142,6 +149,10 @@ export function SharingTab({
   };
 
   const removeMember = async (member) => {
+    if (isSelf(member)) {
+      toast.error("You can't remove your own access. Ask the document owner.");
+      return;
+    }
     const index = members.findIndex((m) => m.id === member.id);
     setMembers((prev) => prev.filter((m) => m.id !== member.id));
     const ok = await removeDocumentMember(member.id);
