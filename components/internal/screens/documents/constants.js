@@ -1,4 +1,16 @@
-import { Globe, Lock, Users } from "lucide-react";
+import {
+  AtSign,
+  BadgeCheck,
+  CalendarDays,
+  CaseSensitive,
+  Globe,
+  Lock,
+  Mail,
+  Signature,
+  TextCursorInput,
+  UserRound,
+  Users,
+} from "lucide-react";
 
 // Lookups and formatters for the documents area (config only, never row data).
 
@@ -42,6 +54,55 @@ export const MEMBER_ROLE_MAP = {
   editor: { label: "Editor", description: "Can read, comment and edit." },
 };
 
+// Signing request status (docs.signing_requests.status, mirrored on documents.metadata.signing).
+export const SIGNING_STATUS_MAP = {
+  sending: { label: "Sending", variant: "info", dotClass: "bg-sky-400" },
+  pending: { label: "Out for signature", variant: "warning", dotClass: "bg-amber-400" },
+  completed: { label: "Signed", variant: "success", dotClass: "bg-emerald-400" },
+  declined: { label: "Declined", variant: "danger", dotClass: "bg-red-400" },
+  cancelled: { label: "Cancelled", variant: "outline", dotClass: "bg-text-tertiary" },
+  failed: { label: "Failed", variant: "danger", dotClass: "bg-red-400" },
+};
+
+export const SIGNING_ORDER_MAP = {
+  parallel: { label: "Any order", description: "Everyone can sign at the same time." },
+  sequential: { label: "In order", description: "Each recipient signs after the one before." },
+};
+
+export const RECIPIENT_ROLE_MAP = {
+  signer: { label: "Signer", description: "Signs the document.", variant: "info", icon: Signature },
+  approver: { label: "Approver", description: "Approves it without signing.", variant: "purple", icon: BadgeCheck },
+  cc: { label: "CC", description: "Gets a copy once it's complete.", variant: "neutral", icon: Mail },
+};
+
+// One recipient's progress through a request, derived by recipientProgress().
+export const RECIPIENT_PROGRESS_MAP = {
+  not_opened: { label: "Not opened", variant: "neutral", dotClass: "bg-muted-foreground" },
+  opened: { label: "Opened", variant: "info", dotClass: "bg-sky-400" },
+  signed: { label: "Signed", variant: "success", dotClass: "bg-emerald-400" },
+  approved: { label: "Approved", variant: "success", dotClass: "bg-emerald-400" },
+  declined: { label: "Declined", variant: "danger", dotClass: "bg-red-400" },
+  copy: { label: "Gets a copy", variant: "outline", dotClass: "bg-text-tertiary" },
+};
+
+// Recipient view model -> RECIPIENT_PROGRESS_MAP key (Not opened -> Opened -> Signed / Declined).
+export function recipientProgress(recipient) {
+  if (recipient?.signingStatus === "declined") return "declined";
+  if (recipient?.role === "cc") return "copy";
+  if (recipient?.signingStatus === "signed") return recipient.role === "approver" ? "approved" : "signed";
+  return recipient?.readStatus === "opened" ? "opened" : "not_opened";
+}
+
+// Icons for inline signing fields ({{signature, r1}}) in the Insert field menu and Markdown chips.
+export const FIELD_TYPE_ICONS = {
+  signature: Signature,
+  initials: CaseSensitive,
+  name: UserRound,
+  email: AtSign,
+  date: CalendarDays,
+  text: TextCursorInput,
+};
+
 export const STATUS_FILTER_OPTIONS = [
   { value: "all", label: "All statuses" },
   ...DOCUMENT_STATUSES.map((status) => ({ value: status, label: status })),
@@ -57,6 +118,19 @@ export function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+export function formatDateTime(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 export function formatRelative(value) {

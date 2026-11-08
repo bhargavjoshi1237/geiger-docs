@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   Check,
+  Copy,
   FileText,
   History,
   Info,
@@ -15,6 +16,7 @@ import {
   MoreHorizontal,
   Save,
   Share2,
+  Signature,
   Trash2,
 } from "lucide-react";
 import {
@@ -44,9 +46,11 @@ import { getUser } from "@/lib/supabase/user";
 import { updateDocument } from "@/lib/supabase/documents";
 import { createDocumentVersion } from "@/lib/supabase/document_versions";
 import { listDocumentMembers } from "@/lib/supabase/document_members";
+import { isLockingStatus, isOpenStatus } from "@/lib/signing/model";
 import {
   DOCUMENT_STATUS_MAP,
   SHARE_MODE_MAP,
+  SIGNING_STATUS_MAP,
   formatDate,
   formatRelative,
 } from "@/components/internal/screens/documents/constants";
@@ -60,6 +64,7 @@ import { DetailsTab } from "@/components/internal/screens/documents/detail/detai
 import { HistoryTab } from "@/components/internal/screens/documents/detail/history_tab";
 import { SharingTab } from "@/components/internal/screens/documents/detail/sharing_tab";
 import { CommentsTab } from "@/components/internal/screens/documents/detail/comments_tab";
+import { SigningTab } from "@/components/internal/screens/documents/detail/signing_tab";
 import { copyPublicLink } from "@/components/internal/screens/documents/detail/utils";
 
 const TABS = [
@@ -67,6 +72,7 @@ const TABS = [
   { value: "details", label: "Details", icon: Info },
   { value: "history", label: "History", icon: History },
   { value: "sharing", label: "Sharing", icon: Share2 },
+  { value: "signing", label: "Signing", icon: Signature },
   { value: "comments", label: "Comments", icon: MessageSquare },
 ];
 
@@ -78,7 +84,15 @@ export function DocumentDetailScreen(props) {
   return <DocumentEditor key={props.document.id} {...props} />;
 }
 
-function DocumentEditor({ document, collections = [], settings, onBack, onChange, onDelete }) {
+function DocumentEditor({
+  document,
+  collections = [],
+  settings,
+  onBack,
+  onChange,
+  onDelete,
+  onDuplicate,
+}) {
   const { section, setSection } = useWorkspaceUrl();
   const active = TABS.some((tab) => tab.value === section) ? section : "content";
 
@@ -101,7 +115,12 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
   const restricted = doc.shareMode === "restricted";
   const access = resolveDocumentAccess(doc, user, members);
   const editable = canEdit(access);
-  const dirty = editable && draft !== (doc.body ?? "");
+  // Title and body are read-only while a signing request is open or completed (a DB trigger enforces it too).
+  const locked = isLockingStatus(doc.signing?.status);
+  // A document out for signature can't be deleted (the DB trigger refuses it too).
+  const deletable = editable && !isOpenStatus(doc.signing?.status);
+  const contentEditable = editable && !locked;
+  const dirty = contentEditable && draft !== (doc.body ?? "");
   const share = SHARE_MODE_MAP[doc.shareMode] || SHARE_MODE_MAP.workspace;
 
   // Resolve who is looking (and, for restricted docs, who was invited) before rendering anything editable.
@@ -150,7 +169,7 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
 
   // Content save: persist the body (and title on restore), then snapshot it as a new version.
   const saveContent = async ({ body = draft, title, silent = false } = {}) => {
-    if (!editable || savingRef.current) return false;
+    if (!contentEditable || savingRef.current) return false;
     savingRef.current = true;
     setSaving(true);
     if (body !== draft) setDraft(body);
@@ -173,6 +192,27 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
     return Boolean(saved);
   };
 
+  // Server-owned status (documents.metadata.signing) mirrored locally so the lock and list pill update at once.
+  const applySigning = ({ requestId, status }) => {
+    const current = docRef.current;
+    if (current.signing?.requestId === requestId && current.signing?.status === status) return;
+    // Locked content can't be saved, so an unsaved draft is dropped (only when someone else sent it meanwhile).
+    if (isLockingStatus(status) && !isLockingStatus(current.signing?.status)) {
+      if (dirty) toast.warning("This document was sent for signature, so your unsaved edits were discarded.");
+      setDraft(current.body ?? "");
+    }
+    apply({ ...current, signing: { requestId, status, updatedAt: new Date().toISOString() } });
+  };
+
+  // Copies the last saved version, so unsaved edits must be saved first.
+  const duplicate = () => {
+    if (dirty) {
+      toast.error("Save your changes before duplicating.");
+      return;
+    }
+    onDuplicate?.(docRef.current);
+  };
+
   const restoreVersion = (version) =>
     saveContent({ body: version.body, title: version.title || "Untitled", silent: true });
 
@@ -180,7 +220,7 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
     if (dirty) saveContent();
   });
 
-  // Ctrl/Cmd+S saves from anywhere in the editor instead of opening the browser's save dialog.
+  // Ctrl/Cmd+S saves from anywhere in the editor instead of opening the browser's save dialog (a no-op while locked).
   useEffect(() => {
     if (!editable) return undefined;
     const onKeyDown = (event) => {
@@ -292,7 +332,7 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0 flex-1">
             <div className="flex min-h-9 flex-wrap items-center gap-2.5">
-              {editable ? (
+              {contentEditable ? (
                 <InlineTitleInput
                   value={titleDraft ?? doc.title}
                   onChange={(e) => setTitleDraft(e.target.value)}
@@ -314,9 +354,17 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
                 </h1>
               )}
               <StatusPill status={doc.status} map={DOCUMENT_STATUS_MAP} />
+              {doc.signing?.status ? (
+                <StatusPill status={doc.signing.status} map={SIGNING_STATUS_MAP} />
+              ) : null}
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium text-muted-foreground">
-              {editable ? (
+              {editable && locked ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5" />
+                  {doc.signing.status === "completed" ? "Signed, read-only" : "Locked for signing"}
+                </span>
+              ) : editable ? (
                 <SaveIndicator saving={saving} dirty={dirty} />
               ) : (
                 <Badge variant="outline">{ACCESS_LABELS[access]}</Badge>
@@ -330,13 +378,13 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
           </div>
 
           <div className="flex min-h-9 shrink-0 flex-wrap items-center gap-2">
-            {editable ? (
+            {contentEditable ? (
               <Button className={PRIMARY} onClick={() => saveContent()} disabled={!dirty || saving}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Save
               </Button>
             ) : null}
-            {isPublic || editable ? (
+            {isPublic || editable || onDuplicate ? (
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -355,8 +403,14 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
                       Copy public link
                     </DropdownMenuItem>
                   ) : null}
-                  {isPublic && editable ? <DropdownMenuSeparator /> : null}
-                  {editable ? (
+                  {onDuplicate ? (
+                    <DropdownMenuItem onSelect={duplicate}>
+                      <Copy />
+                      Duplicate
+                    </DropdownMenuItem>
+                  ) : null}
+                  {(isPublic || onDuplicate) && deletable ? <DropdownMenuSeparator /> : null}
+                  {deletable ? (
                     <DropdownMenuItem
                       variant="destructive"
                       onSelect={() => setConfirm("delete")}
@@ -384,7 +438,14 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
         </TabsList>
 
         <TabsContent value="content">
-          <ContentTab draft={draft} onDraftChange={setDraft} editable={editable} />
+          <ContentTab
+            draft={draft}
+            onDraftChange={setDraft}
+            editable={editable}
+            lock={locked ? doc.signing.status : null}
+            onOpenSigning={() => setSection("signing")}
+            onDuplicate={onDuplicate ? duplicate : undefined}
+          />
         </TabsContent>
         <TabsContent value="details">
           <DetailsTab
@@ -398,7 +459,7 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
         <TabsContent value="history">
           <HistoryTab
             document={doc}
-            editable={editable}
+            editable={contentEditable}
             dirty={dirty}
             versionKey={versionKey}
             onRestore={restoreVersion}
@@ -414,6 +475,17 @@ function DocumentEditor({ document, collections = [], settings, onBack, onChange
             membersReady={membersReady}
             setMembers={setMembers}
             onPersist={persist}
+          />
+        </TabsContent>
+        <TabsContent value="signing">
+          <SigningTab
+            document={doc}
+            editable={editable}
+            isOwner={access === "owner"}
+            dirty={dirty}
+            saving={saving}
+            onSave={() => saveContent()}
+            onSigningChange={applySigning}
           />
         </TabsContent>
         <TabsContent value="comments">

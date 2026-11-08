@@ -1,7 +1,63 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { PenLine } from "lucide-react";
+import { fieldTypeLabel, splitFieldTokens } from "@/lib/signing/fields";
+import { FIELD_TYPE_ICONS } from "@/components/internal/screens/documents/constants";
 import { cn } from "@/lib/utils";
+
+// Replaces signing field tokens in text runs with a `field-token` element; code nodes hold `value`, not text children, so they stay literal.
+function replaceFieldTokens(node) {
+  if (!Array.isArray(node.children)) return;
+  let changed = false;
+  const next = [];
+  for (const child of node.children) {
+    if (child.type !== "text") {
+      replaceFieldTokens(child);
+      next.push(child);
+      continue;
+    }
+    const parts = splitFieldTokens(child.value);
+    if (!parts.some((part) => typeof part !== "string")) {
+      next.push(child);
+      continue;
+    }
+    changed = true;
+    for (const part of parts) {
+      if (typeof part === "string") {
+        if (part) next.push({ type: "text", value: part });
+        continue;
+      }
+      next.push({
+        type: "fieldToken",
+        data: {
+          hName: "field-token",
+          hProperties: { dataField: part.type, dataRecipient: String(part.position) },
+        },
+        children: [{ type: "text", value: part.raw }],
+      });
+    }
+  }
+  if (changed) node.children = next;
+}
+
+const remarkFieldTokens = () => (tree) => replaceFieldTokens(tree);
+
+const REMARK_PLUGINS = [remarkGfm, remarkFieldTokens];
+
+// Compact chip for an inline signing field, e.g. "Signature · Recipient 1"; the raw token stays in the tooltip.
+function FieldChip({ "data-field": type, "data-recipient": recipient, children }) {
+  const Icon = FIELD_TYPE_ICONS[type] || PenLine;
+  return (
+    <span
+      title={typeof children === "string" ? children : undefined}
+      className="mx-0.5 inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-sky-500/20 bg-sky-500/10 px-1.5 py-px align-baseline font-sans text-xs font-medium not-italic text-sky-700 dark:text-sky-400"
+    >
+      <Icon aria-hidden="true" className="h-3 w-3 shrink-0" />
+      {fieldTypeLabel(type || "field")} · Recipient {recipient}
+    </span>
+  );
+}
 
 // Element styling for rendered Markdown (semantic tokens only); each override drops react-markdown's `node` prop.
 const COMPONENTS = {
@@ -49,13 +105,14 @@ const COMPONENTS = {
     // eslint-disable-next-line @next/next/no-img-element
     <img alt={alt || ""} className="my-4 max-w-full rounded-lg border border-border" {...props} />
   ),
+  "field-token": ({ node: _node, ...props }) => <FieldChip {...props} />,
 };
 
 // Renders a Markdown string (GFM: tables, task lists, strikethrough); safe by default, raw HTML is not rendered.
 export function MarkdownView({ source, className }) {
   return (
     <div className={cn("min-w-0 break-words text-sm", className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={COMPONENTS}>
+      <ReactMarkdown remarkPlugins={REMARK_PLUGINS} components={COMPONENTS}>
         {source || ""}
       </ReactMarkdown>
     </div>

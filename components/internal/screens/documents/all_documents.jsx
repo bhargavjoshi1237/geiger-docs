@@ -35,6 +35,7 @@ import {
   DOCUMENT_STATUS_MAP,
   SHARE_FILTER_OPTIONS,
   SHARE_MODE_MAP,
+  SIGNING_STATUS_MAP,
   STATUS_FILTER_OPTIONS,
   formatRelative,
   wordCount,
@@ -50,6 +51,7 @@ import { DEFAULT_SETTINGS, getSettings } from "@/lib/supabase/settings";
 import { getUser } from "@/lib/supabase/user";
 import { useWorkspaceUrl } from "@/lib/hooks/use-workspace-url";
 import { useProject } from "@/context/project-context";
+import { isOpenStatus } from "@/lib/signing/model";
 
 const PRIMARY_BUTTON = "bg-primary text-primary-foreground hover:bg-primary/90";
 
@@ -199,6 +201,13 @@ export function DocumentsScreen() {
     };
     const created = await insertDocument(copy, "Couldn't duplicate the document.");
     if (created) toast.success(`Duplicated "${doc.title || "Untitled"}".`);
+    return created;
+  };
+
+  // From the editor: duplicate, then open the copy (the usual way to change a signed document).
+  const handleDuplicateAndOpen = async (doc) => {
+    const created = await handleDuplicate(doc);
+    if (created) openDoc(created.id);
   };
 
   // Detail edits are already persisted by the editor; mirror them into the list.
@@ -243,6 +252,7 @@ export function DocumentsScreen() {
           onBack={closeDoc}
           onChange={handleChange}
           onDelete={handleDelete}
+          onDuplicate={handleDuplicateAndOpen}
         />
       );
     }
@@ -272,9 +282,14 @@ export function DocumentsScreen() {
           <span className="block max-w-md truncate font-medium text-foreground">
             {d.title || "Untitled"}
           </span>
-          <span className="text-xs text-text-secondary">
-            {(d.collectionId && collectionNames.get(d.collectionId)) || "No collection"} ·{" "}
-            {formatWords(wordCount(d.body))}
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-secondary">
+            <span>
+              {(d.collectionId && collectionNames.get(d.collectionId)) || "No collection"} ·{" "}
+              {formatWords(wordCount(d.body))}
+            </span>
+            {d.signing?.status ? (
+              <StatusPill status={d.signing.status} map={SIGNING_STATUS_MAP} />
+            ) : null}
           </span>
         </div>
       ),
@@ -307,13 +322,18 @@ export function DocumentsScreen() {
           items={[
             { icon: FileText, label: "Open", onSelect: () => openDoc(d.id) },
             { icon: Copy, label: "Duplicate", onSelect: () => handleDuplicate(d) },
-            { separator: true },
-            {
-              icon: Trash2,
-              label: "Delete",
-              variant: "destructive",
-              onSelect: () => setDeleteTarget(d),
-            },
+            // Out for signature: deleting is refused by the DB trigger, so don't offer it.
+            ...(isOpenStatus(d.signing?.status)
+              ? []
+              : [
+                  { separator: true },
+                  {
+                    icon: Trash2,
+                    label: "Delete",
+                    variant: "destructive",
+                    onSelect: () => setDeleteTarget(d),
+                  },
+                ]),
           ]}
         />
       ),
