@@ -114,6 +114,15 @@ Then click **Test** on the webhook in Documenso and expect `200`.
 
 If you add a custom domain on Render, set `NEXT_PUBLIC_WEBAPP_URL` to it (the script never overrides an explicit value) and update `DOCUMENSO_URL`.
 
+## Plain web service (no Blueprint)
+
+The Blueprint can't create free-plan services, so for a free or quick setup create the pieces by hand:
+
+1. **Postgres:** New → Postgres, in the same region as the web service. Copy its **Internal Database URL**.
+2. **Web service:** New → Web Service from this repo, runtime **Docker**, Dockerfile path `deploy/documenso/render/Dockerfile`. Leave the Docker build context at the repo root (the default) and the Docker Command empty.
+3. **Environment:** Add from .env with the same variables the Blueprint sets (see `render.yaml`): `DATABASE_URL` (step 1), the Resend key and sender, stable values for `NEXTAUTH_SECRET`, both encryption keys, `NEXT_PRIVATE_SIGNING_PASSPHRASE` and `DOCUMENSO_WEBHOOK_SECRET`, plus `NODE_OPTIONS=--max-old-space-size=384` on 512 MB. Generate the secrets once and keep them; the encryption keys can never change after Documenso holds data.
+4. Continue from **2. First boot** below.
+
 ## Free tier
 
 The Blueprint avoids the free tier. If you switch to it anyway, change both `plan:` values to `free`, remove `diskSizeGB`, and set `NODE_OPTIONS=--max-old-space-size=384`. Then expect the following:
