@@ -70,9 +70,12 @@ if [ -z "${NEXT_PUBLIC_WEBAPP_URL:-}" ]; then
     NEXT_PUBLIC_WEBAPP_URL=$RENDER_EXTERNAL_URL
   elif [ -n "${RENDER_EXTERNAL_HOSTNAME:-}" ]; then
     NEXT_PUBLIC_WEBAPP_URL="https://$RENDER_EXTERNAL_HOSTNAME"
+  # Koyeb injects the service's public domain
+  elif [ -n "${KOYEB_PUBLIC_DOMAIN:-}" ]; then
+    NEXT_PUBLIC_WEBAPP_URL="https://$KOYEB_PUBLIC_DOMAIN"
   else
     NEXT_PUBLIC_WEBAPP_URL="http://localhost:$PORT"
-    warn "RENDER_EXTERNAL_URL is not set, so NEXT_PUBLIC_WEBAPP_URL defaults to $NEXT_PUBLIC_WEBAPP_URL"
+    warn "No public URL found (RENDER_EXTERNAL_URL / KOYEB_PUBLIC_DOMAIN), so NEXT_PUBLIC_WEBAPP_URL defaults to $NEXT_PUBLIC_WEBAPP_URL; set it explicitly"
   fi
 fi
 export NEXT_PUBLIC_WEBAPP_URL="${NEXT_PUBLIC_WEBAPP_URL%/}"
