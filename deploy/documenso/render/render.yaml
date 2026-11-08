@@ -8,9 +8,9 @@ services:
     plan: 1c-2g
     # Close to Vercel's default function region (iad1); keep it equal to the database's, it can't change after creation
     region: virginia
-    # Paths are relative to the repo root (no rootDir), so the Docker context is just this folder
+    # Paths are relative to the repo root (no rootDir); the Dockerfile COPYs repo-relative paths, so the context is the root
     dockerfilePath: ./deploy/documenso/render/Dockerfile
-    dockerContext: ./deploy/documenso/render
+    dockerContext: .
     buildFilter:
       paths:
         - deploy/documenso/render/**

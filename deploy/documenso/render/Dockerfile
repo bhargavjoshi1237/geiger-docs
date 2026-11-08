@@ -5,7 +5,8 @@ FROM documenso/documenso:v2.21.1
 
 # Root only for setup; the image already ships openssl (Alpine), so apk runs only if a future tag drops it
 USER root
-COPY entrypoint.sh /opt/geiger/render-entrypoint.sh
+# Build context is the repo root (Render's default for a plain web service and the Blueprint alike)
+COPY deploy/documenso/render/entrypoint.sh /opt/geiger/render-entrypoint.sh
 RUN { command -v openssl >/dev/null 2>&1 || apk add --no-cache openssl; } \
     && sed -i 's/\r$//' /opt/geiger/render-entrypoint.sh \
     && chmod 0555 /opt/geiger/render-entrypoint.sh \
