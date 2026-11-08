@@ -1,0 +1,99 @@
+# Documenso signing service for Geiger Docs: unmodified official image plus its own Postgres.
+# All values come from ./.env (copy .env.example). Runbook: ./README.md. Decision: docs/decisions/2026-11-08-signing-with-documenso.md
+name: geiger-documenso
+
+services:
+  database:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - database:/var/lib/postgresql/data
+
+  documenso:
+    # Upgrade by bumping this tag only (see README "Upgrading"). Never build or patch this image.
+    image: documenso/documenso:v2.21.1
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      # Licence: empty = Community Edition (AGPL, unmodified)
+      NEXT_PRIVATE_DOCUMENSO_LICENSE_KEY: ${NEXT_PRIVATE_DOCUMENSO_LICENSE_KEY:-}
+
+      # Server and URLs
+      PORT: ${PORT:-3000}
+      NEXT_PUBLIC_WEBAPP_URL: ${NEXT_PUBLIC_WEBAPP_URL:?set NEXT_PUBLIC_WEBAPP_URL in .env}
+      NEXT_PRIVATE_INTERNAL_WEBAPP_URL: ${NEXT_PRIVATE_INTERNAL_WEBAPP_URL:-http://localhost:${PORT:-3000}}
+      NEXT_PRIVATE_WEBHOOK_SSRF_BYPASS_HOSTS: ${NEXT_PRIVATE_WEBHOOK_SSRF_BYPASS_HOSTS:-}
+
+      # Secrets
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?set NEXTAUTH_SECRET in .env}
+      NEXT_PRIVATE_ENCRYPTION_KEY: ${NEXT_PRIVATE_ENCRYPTION_KEY:?set NEXT_PRIVATE_ENCRYPTION_KEY in .env}
+      NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY: ${NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY:?set NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY in .env}
+
+      # Database
+      NEXT_PRIVATE_DATABASE_URL: ${NEXT_PRIVATE_DATABASE_URL:?set NEXT_PRIVATE_DATABASE_URL in .env}
+      NEXT_PRIVATE_DIRECT_DATABASE_URL: ${NEXT_PRIVATE_DIRECT_DATABASE_URL:-${NEXT_PRIVATE_DATABASE_URL}}
+
+      # Signing certificate (file mounted below; the passphrase must not be empty)
+      NEXT_PRIVATE_SIGNING_TRANSPORT: ${NEXT_PRIVATE_SIGNING_TRANSPORT:-local}
+      NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH: /opt/documenso/cert.p12
+      NEXT_PRIVATE_SIGNING_PASSPHRASE: ${NEXT_PRIVATE_SIGNING_PASSPHRASE:?set NEXT_PRIVATE_SIGNING_PASSPHRASE in .env (must not be empty)}
+      NEXT_PRIVATE_SIGNING_TIMESTAMP_AUTHORITY: ${NEXT_PRIVATE_SIGNING_TIMESTAMP_AUTHORITY:-}
+      NEXT_PRIVATE_SIGNING_REASON: ${NEXT_PRIVATE_SIGNING_REASON:-}
+      NEXT_PUBLIC_SIGNING_CONTACT_INFO: ${NEXT_PUBLIC_SIGNING_CONTACT_INFO:-}
+
+      # Email via Resend
+      NEXT_PRIVATE_SMTP_TRANSPORT: ${NEXT_PRIVATE_SMTP_TRANSPORT:?set NEXT_PRIVATE_SMTP_TRANSPORT in .env}
+      NEXT_PRIVATE_RESEND_API_KEY: ${NEXT_PRIVATE_RESEND_API_KEY:?set NEXT_PRIVATE_RESEND_API_KEY in .env}
+      NEXT_PRIVATE_SMTP_FROM_NAME: ${NEXT_PRIVATE_SMTP_FROM_NAME:?set NEXT_PRIVATE_SMTP_FROM_NAME in .env}
+      NEXT_PRIVATE_SMTP_FROM_ADDRESS: ${NEXT_PRIVATE_SMTP_FROM_ADDRESS:?set NEXT_PRIVATE_SMTP_FROM_ADDRESS in .env}
+
+      # Document storage
+      NEXT_PUBLIC_UPLOAD_TRANSPORT: ${NEXT_PUBLIC_UPLOAD_TRANSPORT:-database}
+      NEXT_PRIVATE_UPLOAD_ENDPOINT: ${NEXT_PRIVATE_UPLOAD_ENDPOINT:-}
+      NEXT_PRIVATE_UPLOAD_FORCE_PATH_STYLE: ${NEXT_PRIVATE_UPLOAD_FORCE_PATH_STYLE:-false}
+      NEXT_PRIVATE_UPLOAD_REGION: ${NEXT_PRIVATE_UPLOAD_REGION:-}
+      NEXT_PRIVATE_UPLOAD_BUCKET: ${NEXT_PRIVATE_UPLOAD_BUCKET:-}
+      NEXT_PRIVATE_UPLOAD_ACCESS_KEY_ID: ${NEXT_PRIVATE_UPLOAD_ACCESS_KEY_ID:-}
+      NEXT_PRIVATE_UPLOAD_SECRET_ACCESS_KEY: ${NEXT_PRIVATE_UPLOAD_SECRET_ACCESS_KEY:-}
+      NEXT_PUBLIC_DOCUMENT_SIZE_UPLOAD_LIMIT: ${NEXT_PUBLIC_DOCUMENT_SIZE_UPLOAD_LIMIT:-50}
+      NEXT_PRIVATE_DOCUMENT_CONVERSION_URL: ${NEXT_PRIVATE_DOCUMENT_CONVERSION_URL:-}
+
+      # Background jobs (emails and webhooks run through these)
+      NEXT_PRIVATE_JOBS_PROVIDER: ${NEXT_PRIVATE_JOBS_PROVIDER:-local}
+      NEXT_PRIVATE_REDIS_URL: ${NEXT_PRIVATE_REDIS_URL:-}
+
+      # Access and features
+      NEXT_PUBLIC_DISABLE_SIGNUP: ${NEXT_PUBLIC_DISABLE_SIGNUP:-true}
+      NEXT_PUBLIC_FEATURE_BILLING_ENABLED: ${NEXT_PUBLIC_FEATURE_BILLING_ENABLED:-}
+      NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY:-}
+      DOCUMENSO_DISABLE_TELEMETRY: ${DOCUMENSO_DISABLE_TELEMETRY:-true}
+    ports:
+      # Bound to localhost; put a TLS reverse proxy (Caddy/nginx) in front for NEXT_PUBLIC_WEBAPP_URL
+      - '${DOCUMENSO_BIND_ADDRESS:-127.0.0.1}:${PORT:-3000}:${PORT:-3000}'
+    volumes:
+      - ${DOCUMENSO_CERT_FILE:-/opt/documenso/cert.p12}:/opt/documenso/cert.p12:ro
+    healthcheck:
+      # Healthy only when /api/health reports "ok" (database reachable and certificate usable)
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/api/health').then((r) => r.json()).then((b) => process.exit(b.status === 'ok' ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+volumes:
+  database:
