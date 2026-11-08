@@ -14,8 +14,10 @@
     "db:seed": "geiger-orm seed"
   },
   "dependencies": {
+    "@geiger/notify": "github:bhargavjoshi1237/geiger-notify#9c99355bb1f3cde790da6f835d8a5fc942d1cb18",
     "@geiger/orm": "github:bhargavjoshi1237/geiger-orm#master",
     "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#1e33dcdb1c62f35d1be6675fc95c9f6612d7d950",
+    "@react-pdf/renderer": "^4.9.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.107.0",
     "class-variance-authority": "^0.7.1",
@@ -29,8 +31,11 @@
     "react-dom": "19.2.4",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "server-only": "^0.0.1",
     "sonner": "^2.0.7",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

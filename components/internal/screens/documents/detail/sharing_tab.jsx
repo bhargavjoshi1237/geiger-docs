@@ -32,6 +32,8 @@ import {
   updateDocumentMember,
   upsertDocumentMember,
 } from "@/lib/supabase/document_members";
+import { notifyDocumentShared } from "@/lib/notifications/client";
+import { useOptionalProject } from "@/context/project-context";
 import { cn } from "@/lib/utils";
 import { copyPublicLink, initials } from "./utils";
 
@@ -54,6 +56,7 @@ export function SharingTab({
   const publicAllowed = settings?.allowPublicLinks !== false;
   const modes = SHARE_MODES.filter((mode) => mode !== "public" || publicAllowed || isPublic);
   const isCreator = Boolean(user) && document.createdBy === user.id;
+  const project = useOptionalProject()?.project;
 
   const [changingMode, setChangingMode] = useState(false);
   const [email, setEmail] = useState("");
@@ -127,6 +130,15 @@ export function SharingTab({
     }
     setMembers((prev) => prev.map((m) => (lower(m.email) === address ? saved : m)));
     toast.success(previous ? `Updated ${address}` : `Added ${address}`);
+    if (!previous) {
+      notifyDocumentShared({
+        document,
+        email: address,
+        role,
+        actor: user,
+        organizationId: project?.id === document.projectId ? project.organization_id : null,
+      });
+    }
   };
 
   // A non-creator editing their own row would lock themselves out mid-edit.

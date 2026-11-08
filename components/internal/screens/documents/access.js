@@ -1,4 +1,4 @@
-// Document access (UI-enforced only; RLS stays demo-open): "owner" | "editor" | "commenter" | "viewer" | "none".
+// Document access for the UI: "owner" | "editor" | "commenter" | "viewer" | "none"; docs.document_access() is the source of truth and this mirrors it.
 
 const MEMBER_ACCESS = new Set(["viewer", "commenter", "editor"]);
 
@@ -6,8 +6,8 @@ const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
 
 export function resolveDocumentAccess(doc, user, members) {
   if (!doc) return "none";
-  // No signed-in user (auth not wired) keeps the workspace fully usable.
-  if (!user) return "editor";
+  // The workspace is gated, so a missing session means no access.
+  if (!user) return "none";
   const isCreator = Boolean(doc.createdBy) && doc.createdBy === user.id;
   if (doc.shareMode !== "restricted") return isCreator ? "owner" : "editor";
   if (isCreator) return "owner";

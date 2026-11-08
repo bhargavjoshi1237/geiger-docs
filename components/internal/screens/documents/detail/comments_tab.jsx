@@ -12,6 +12,7 @@ import {
   listDocumentComments,
   softDeleteDocumentComment,
 } from "@/lib/supabase/document_comments";
+import { notifyCommentCreated } from "@/lib/notifications/client";
 import { initials } from "./utils";
 
 // Flat comment thread, oldest first; commenters and editors can post, everyone sees it.
@@ -62,6 +63,7 @@ export function CommentsTab({ document, user, access }) {
     }
     setComments((prev) => prev.map((c) => (c.id === optimistic.id ? saved : c)));
     toast.success("Comment posted");
+    notifyCommentCreated({ document, comment: saved, actorId: user?.id });
   };
 
   const remove = async (comment) => {
