@@ -1,7 +1,7 @@
 # Decision: e-signing with self-hosted Documenso
 
 - **Date:** 2026-11-08
-- **Status:** Accepted
+- **Status:** Accepted; the "do not modify it" rule is superseded by `2026-11-21-geiger-sign-fork.md` (we now run a public AGPL fork, Geiger Sign). Everything else still applies.
 - **Scope:** Geiger Docs, Step 2 of `docs/superpowers/specs/2026-11-08-harden-and-signing-design.md`
 - **Deploy kit:** `deploy/documenso/`
 

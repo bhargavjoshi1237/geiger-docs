@@ -2,14 +2,14 @@
 
 This runbook covers the self-hosted Documenso instance that Geiger Docs uses for e-signing. The reasoning behind it is in `docs/decisions/2026-11-08-signing-with-documenso.md`.
 
-**Run the official image as it ships.** No forks, no patches, and no files mounted over the app code. Everything here is configuration.
+**Run the Geiger Sign image.** Geiger Sign is our public AGPL fork of Documenso ([source](https://github.com/bhargavjoshi1237/geiger-sign), reasoning in `docs/decisions/2026-11-21-geiger-sign-fork.md`). Change Documenso's code only in that repo; never patch the running container or mount files over the app code.
 
 For a temporary, self-configuring instance on Render (Blueprint, no host to manage), use [`render/README.md`](render/README.md) instead of steps 0–4.
 
 | | |
 |---|---|
-| Image | `documenso/documenso:v2.21.1` (pinned in `compose.yml`) + `postgres:15` |
-| Public URL | `https://sign.geiger.studio` (example) = `NEXT_PUBLIC_WEBAPP_URL` = Geiger Docs `DOCUMENSO_URL` |
+| Image | `ghcr.io/bhargavjoshi1237/geiger-sign:geiger-v2.21.1-1` (pinned in `compose.yml`) + `postgres:15` |
+| Public URL | `https://sign.geiger.studio` = `NEXT_PUBLIC_WEBAPP_URL` = Geiger Docs `DOCUMENSO_URL` |
 | Geiger Docs env it produces | `DOCUMENSO_URL`, `DOCUMENSO_API_TOKEN`, `DOCUMENSO_WEBHOOK_SECRET` |
 
 ⚠ marks steps I could not verify end to end. Nothing in this kit has been run yet.
@@ -169,6 +169,21 @@ Go to Team settings → Preferences → **Document**. You can set these on the o
 
 These settings control what is embedded in the signed PDF. Geiger Docs also downloads the certificate and audit log as separate files, so both copies are kept either way.
 
+## 8b. Branding
+
+The image already says Geiger Sign everywhere a setting can't reach. Finish the look in settings:
+
+1. Env on the service: `NEXT_PRIVATE_SMTP_FROM_NAME="Geiger Sign"`, `NEXT_PRIVATE_SIGNING_REASON="Signed with Geiger Sign"`, `NEXT_PUBLIC_DISABLE_SIGNUP=true`.
+2. Team settings → **Branding** (the team that owns the API token):
+   - Enable custom branding.
+   - Logo: upload `packages/email/static/logo.png` from the geiger-sign repo.
+   - Brand website: `https://geiger.studio`.
+   - Brand details: the Geiger legal name and address.
+   - Colours: primary `#18181b`, background `#ffffff`.
+3. Send a test document to yourself and check: the email shows the Geiger Sign logo and sender, the signing page tab reads "Sign Document - Geiger Sign", and the footer has the "Source code" link.
+
+Branding lives in Documenso's database, so it survives image upgrades.
+
 ## 9. Private networks (SSRF bypass)
 
 Documenso refuses to deliver webhooks to private or loopback addresses. If Geiger Docs is reachable from Documenso only on a private network, list the target hosts and recreate the container:
@@ -192,7 +207,7 @@ Examples of a private network: the same Docker network, a LAN, or a VPN such as 
    cp .env .env.backup-$(date +%Y%m%d)
    ```
 
-3. Change the image tag in `compose.yml`, for example `v2.21.1` → `v2.22.0`. This is the only change; never use `latest`.
+3. In `geiger-sign`, merge the upstream tag into `geiger` (`git fetch upstream --tags && git merge v2.22.0`), run `node scripts/geiger/check-branding.mjs`, push, and tag `geiger-v2.22.0-1`. Then change the image tag in `compose.yml` (and `render/Dockerfile`) to it. Never use `latest`.
 4. Pull and restart:
 
    ```bash

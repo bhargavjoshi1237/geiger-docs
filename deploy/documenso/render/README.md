@@ -1,11 +1,11 @@
 # Documenso on Render (temporary instance): runbook
 
-A Render Blueprint that runs the official, unmodified `documenso/documenso:v2.21.1` image with its own Render Postgres. A small boot script wraps the image; it only sets env and a signing certificate, then hands over to the image's own entrypoint and start command. Migrations and startup behave exactly as upstream. For general Documenso operations, see [`../README.md`](../README.md). The licensing rules are in `docs/decisions/2026-11-08-signing-with-documenso.md`.
+A Render Blueprint that runs the Geiger Sign image (`ghcr.io/bhargavjoshi1237/geiger-sign:geiger-v2.21.1-1`, our public AGPL fork of Documenso) with its own Render Postgres. A small boot script wraps the image; it only sets env and a signing certificate, then hands over to the image's own entrypoint and start command. Migrations and startup behave exactly as upstream. For general Documenso operations, see [`../README.md`](../README.md). The licensing rules are in `docs/decisions/2026-11-08-signing-with-documenso.md` and `docs/decisions/2026-11-21-geiger-sign-fork.md`.
 
 | File | Purpose |
 |---|---|
 | `render.yaml` | Blueprint: the Docker web service, Postgres, generated secrets and fixed config |
-| `Dockerfile` | `FROM documenso/documenso:v2.21.1`, adds the boot script, keeps upstream's user, entrypoint and CMD |
+| `Dockerfile` | `FROM ghcr.io/bhargavjoshi1237/geiger-sign:geiger-v2.21.1-1`, adds the boot script, keeps upstream's user, entrypoint and CMD |
 | `entrypoint.sh` | Runs on every boot: maps Render's env, provisions the certificate, promotes the admin, logs the setup values |
 
 ⚠ marks things I could not verify without deploying. The script itself was tested locally under `dash`, against Documenso's real Prisma schema. Neither the image build nor a Render deploy has been run.

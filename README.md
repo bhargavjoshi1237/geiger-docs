@@ -23,7 +23,7 @@ It sits alongside Geiger Notes — where Notes is a free-form canvas for thinkin
 **v1 workspace, hardened, with signing.** Per-project Overview, Documents (Markdown editor with preview, version history, sharing, comments and signing), Collections, Templates, Shared and Settings screens, plus a read-only public page at `/d/<id>`.
 
 - **Access** is enforced by Postgres RLS: project members see workspace documents, restricted documents are visible only to their creator and invited people, and public links honour the project's setting. The workspace requires a suite sign-in (`proxy.js`).
-- **Signing** runs through a self-hosted, unmodified [Documenso](https://github.com/documenso/documenso) called over its API. Documents render to PDF with a signature page; authors can also place fields inline (`{{signature, r1}}`). Content locks while out for signature and after signing.
+- **Signing** runs through [Geiger Sign](https://github.com/bhargavjoshi1237/geiger-sign), our public AGPL fork of [Documenso](https://github.com/documenso/documenso), called over its API. Documents render to PDF with a signature page; authors can also place fields inline (`{{signature, r1}}`). Content locks while out for signature and after signing.
 - **Notifications** use the suite's `@geiger/notify` bell.
 
 Designs live in [`docs/superpowers/specs/`](docs/superpowers/specs), the signing decision in [`docs/decisions/`](docs/decisions), and research in [`docs/product-research/`](docs/product-research).
