@@ -37,7 +37,7 @@ Why these plans:
 
 ## 1. Deploy the Blueprint
 
-1. Commit and push `deploy/documenso/render/` to the branch Render will track. It is currently uncommitted on `feat/harden-and-signing`.
+1. Commit and push `deploy/documenso/render/` to the branch Render will track.
 2. In the Render Dashboard, go to **New > Blueprint**, connect the repo and pick the branch.
 3. Set **Blueprint Path** to `deploy/documenso/render/render.yaml`.
    - Render looks for `render.yaml` at the repo root by default, but this field accepts any path.
@@ -121,7 +121,7 @@ The Blueprint can't create free-plan services, so for a free or quick setup crea
 1. **Postgres:** New → Postgres, in the same region as the web service. Copy its **Internal Database URL**.
 2. **Web service:** New → Web Service from this repo, runtime **Docker**, Dockerfile path `deploy/documenso/render/Dockerfile`. Leave the Docker build context at the repo root (the default) and the Docker Command empty.
 3. **Environment:** Add from .env with the same variables the Blueprint sets (see `render.yaml`): `DATABASE_URL` (step 1), the Resend key and sender, stable values for `NEXTAUTH_SECRET`, both encryption keys, `NEXT_PRIVATE_SIGNING_PASSPHRASE` and `DOCUMENSO_WEBHOOK_SECRET`, plus `NODE_OPTIONS=--max-old-space-size=384` on 512 MB. Generate the secrets once and keep them; the encryption keys can never change after Documenso holds data.
-4. Continue from **2. First boot** below.
+4. Continue from **2. First boot** above.
 
 ## Free tier
 
