@@ -53,8 +53,8 @@ Out of scope: restyling `packages/ui/primitives`, replacing Documenso's header/s
 
 In Documenso admin → team settings → Branding, for the team that owns the API token:
 
-- Enable branding; upload the Geiger Sign logo; brand URL `https://geiger.studio`; company details (Geiger legal name/address).
-- Brand colours = Geiger primary/background; custom CSS sets the Inter font stack and Geiger radii.
+- Enable branding; brand URL `https://geiger.studio`; company details (Geiger legal name/address).
+- Logo, brand colours and custom CSS stay unset: the image's defaults are already Geiger Sign and adapt to light and dark mode (setting them would pin light-mode values).
 - Env on the service: `NEXT_PRIVATE_SMTP_FROM_NAME="Geiger Sign"`, `NEXT_PRIVATE_SIGNING_REASON="Signed with Geiger Sign"`, `NEXT_PUBLIC_WEBAPP_URL=https://sign.geiger.studio`.
 
 These live in Documenso's database/env, so they're recorded as checklist steps in the runbook.

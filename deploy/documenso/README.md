@@ -176,11 +176,11 @@ The image already says Geiger Sign everywhere a setting can't reach. Finish the 
 1. Env on the service: `NEXT_PRIVATE_SMTP_FROM_NAME="Geiger Sign"`, `NEXT_PRIVATE_SIGNING_REASON="Signed with Geiger Sign"`, `NEXT_PUBLIC_DISABLE_SIGNUP=true`.
 2. Team settings → **Branding** (the team that owns the API token):
    - Enable custom branding.
-   - Logo: upload `packages/email/static/logo.png` from the geiger-sign repo.
    - Brand website: `https://geiger.studio`.
    - Brand details: the Geiger legal name and address.
-   - Colours: primary `#18181b`, background `#ffffff`.
-3. Send a test document to yourself and check: the email shows the Geiger Sign logo and sender, the signing page tab reads "Sign Document - Geiger Sign", and the footer has the "Source code" link.
+
+   Leave the logo and colours unset — the Geiger Sign image's defaults adapt to light and dark mode.
+3. Send a test document to yourself and check: the email shows the Geiger Sign logo and sender, the signing page tab reads "Sign Document - Geiger Sign", and the page shows the "Source code" link (sidebar footer on desktop, below the document on mobile).
 
 Branding lives in Documenso's database, so it survives image upgrades.
 

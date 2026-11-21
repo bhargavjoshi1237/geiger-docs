@@ -57,7 +57,7 @@ services:
       - key: NEXT_PRIVATE_SMTP_TRANSPORT
         value: resend
       - key: NEXT_PRIVATE_SMTP_FROM_NAME
-        value: Geiger Docs
+        value: Geiger Sign
       - key: NEXT_PRIVATE_SMTP_FROM_ADDRESS
         value: signing@geiger.studio
       - key: NEXT_PUBLIC_UPLOAD_TRANSPORT

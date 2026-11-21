@@ -1,5 +1,5 @@
 # Documenso signing service for Geiger Docs: the Geiger Sign image (public AGPL fork of Documenso) plus its own Postgres.
-# All values come from ./.env (copy .env.example). Runbook: ./README.md. Decision: docs/decisions/2026-11-08-signing-with-documenso.md
+# All values come from ./.env (copy .env.example). Runbook: ./README.md. Decision: docs/decisions/2026-11-08-signing-with-documenso.md and docs/decisions/2026-11-21-geiger-sign-fork.md
 name: geiger-documenso
 
 services:

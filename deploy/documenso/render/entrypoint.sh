@@ -1,7 +1,7 @@
 #!/bin/sh
 # Render boot wrapper for the Geiger Sign image, our public AGPL fork of Documenso (Geiger Docs signing service).
 # It only sets env, a signing certificate and the first admin's role, logs what Geiger Docs needs, then execs the upstream entrypoint + CMD.
-# Runbook: deploy/documenso/render/README.md. Decision: docs/decisions/2026-11-08-signing-with-documenso.md
+# Runbook: deploy/documenso/render/README.md. Decision: docs/decisions/2026-11-08-signing-with-documenso.md and docs/decisions/2026-11-21-geiger-sign-fork.md
 set -eu
 
 # Upstream image layout (documenso/documenso:v2.21.1)
