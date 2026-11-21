@@ -1,4 +1,4 @@
-# Render Blueprint: Geiger Docs signing service (Geiger Sign geiger-v2.21.1-1, our public AGPL fork of Documenso, + boot script) and its own Render Postgres.
+# Render Blueprint: Geiger Docs signing service (Geiger Sign geiger-v2.21.1-2, our public AGPL fork of Documenso, + boot script) and its own Render Postgres.
 # Create it with New > Blueprint and Blueprint Path deploy/documenso/render/render.yaml. Runbook: ./README.md
 services:
   - type: web

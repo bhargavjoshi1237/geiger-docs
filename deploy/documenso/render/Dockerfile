@@ -1,7 +1,7 @@
 # Geiger Docs signing service: the Geiger Sign image (public AGPL fork of Documenso) plus a boot script.
 # The script only sets env and a signing certificate, then execs the image's own entrypoint and CMD (see entrypoint.sh, README.md).
 # Upgrade by bumping this tag to a newer geiger-v* release of github.com/bhargavjoshi1237/geiger-sign.
-FROM ghcr.io/bhargavjoshi1237/geiger-sign:geiger-v2.21.1-1
+FROM ghcr.io/bhargavjoshi1237/geiger-sign:geiger-v2.21.1-2
 
 # Root only for setup; the image already ships openssl (Alpine), so apk runs only if a future tag drops it
 USER root

@@ -8,7 +8,7 @@ For a temporary, self-configuring instance on Render (Blueprint, no host to mana
 
 | | |
 |---|---|
-| Image | `ghcr.io/bhargavjoshi1237/geiger-sign:geiger-v2.21.1-1` (pinned in `compose.yml`) + `postgres:15` |
+| Image | `ghcr.io/bhargavjoshi1237/geiger-sign:geiger-v2.21.1-2` (pinned in `compose.yml`) + `postgres:15` |
 | Public URL | `https://sign.geiger.studio` = `NEXT_PUBLIC_WEBAPP_URL` = Geiger Docs `DOCUMENSO_URL` |
 | Geiger Docs env it produces | `DOCUMENSO_URL`, `DOCUMENSO_API_TOKEN`, `DOCUMENSO_WEBHOOK_SECRET` |
 

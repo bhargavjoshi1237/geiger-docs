@@ -20,7 +20,7 @@ services:
 
   documenso:
     # Geiger Sign (github.com/bhargavjoshi1237/geiger-sign). Upgrade by bumping the geiger-v* tag (see README "Upgrading").
-    image: ghcr.io/bhargavjoshi1237/geiger-sign:geiger-v2.21.1-1
+    image: ghcr.io/bhargavjoshi1237/geiger-sign:geiger-v2.21.1-2
     restart: unless-stopped
     depends_on:
       database:
